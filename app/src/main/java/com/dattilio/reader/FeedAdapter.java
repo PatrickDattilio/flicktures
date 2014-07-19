@@ -1,25 +1,20 @@
 package com.dattilio.reader;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.dattilio.reader.types.Avatar;
-import com.dattilio.reader.types.FeedItem;
-import com.dattilio.reader.types.User;
+import com.dattilio.reader.network.NetworkService;
+import com.googlecode.flickrjandroid.people.User;
+import com.googlecode.flickrjandroid.photos.Photo;
 import com.squareup.picasso.Picasso;
+
 
 class FeedAdapter extends CursorAdapter {
 
@@ -44,92 +39,96 @@ class FeedAdapter extends CursorAdapter {
         inflater = LayoutInflater.from(context);
     }
 
-    private static class ViewHolder {
-        ImageView image;
-        TextView title;
-        TextView url;
-        ImageView userImage;
-        TextView userName;
-    }
-
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = inflater.inflate(R.layout.listview_item, parent, false);
+        View view = new SquareImageView(context);//inflater.inflate(R.layout.grid_item, parent, false);
         ViewHolder viewHolder = new ViewHolder();
-        viewHolder.image = (ImageView) view.findViewById(R.id.item_image);
-        viewHolder.title = (TextView) view.findViewById(R.id.item_title);
-        viewHolder.url = (TextView) view.findViewById(R.id.item_url);
-        viewHolder.userImage = (ImageView) view.findViewById(R.id.item_user_image);
-        viewHolder.userName = (TextView) view.findViewById(R.id.item_user_name);
+        viewHolder.image = (SquareImageView) view;
+//        viewHolder.title = (TextView) view.findViewById(R.id.item_title);
+//        viewHolder.url = (TextView) view.findViewById(R.id.item_url);
+//        viewHolder.userImage = (ImageView) view.findViewById(R.id.item_user_image);
+//        viewHolder.userName = (TextView) view.findViewById(R.id.item_user_name);
         view.setTag(viewHolder);
+        ((ImageView) view).setScaleType(ImageView.ScaleType.CENTER_CROP);
         return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder vhold = (ViewHolder) view.getTag();
-        Avatar avatar = new Avatar(cursor.getString(FeedQuery.AVATAR_SRC), cursor.getInt(FeedQuery.AVATAR_WIDTH), cursor.getInt(FeedQuery.AVATAR_HEIGHT));
-        User user = new User(cursor.getString(FeedQuery.NAME), avatar, cursor.getString(FeedQuery.USERNAME));
-        FeedItem item = new FeedItem(cursor.getString(FeedQuery.HREF), cursor.getString(FeedQuery.SRC), cursor.getString(FeedQuery.DESC), cursor.getString(FeedQuery.ATTRIB), user);
+        User user = new User();
+        user.setId(cursor.getString(PhotoQuery.OWNER));
+        com.googlecode.flickrjandroid.photos.Photo photo = new com.googlecode.flickrjandroid.photos.Photo();
+        photo.setId(cursor.getString(PhotoQuery.ID));
+        photo.setUrl(cursor.getString(PhotoQuery.URL));
+        photo.setFarm(cursor.getString(PhotoQuery.FARM));
+        photo.setTitle(cursor.getString(PhotoQuery.TITLE));
+        photo.setOwner(user);
+        photo.setServer(cursor.getString(PhotoQuery.SERVER));
+        photo.setSecret(cursor.getString(PhotoQuery.SECRET));
 
-        //Load the image using Picasso into the item image, resizing/cropping to fit.
-        Picasso.with(context).load(item.src).resize(srcWidth, srcHeight).centerCrop().into(vhold.image);
-        vhold.title.setText(item.desc);
+        //Load the image using Picasso into the photo image, resizing/cropping to fit.
+        Picasso.with(context).load(photo.getLargeSquareUrl()).placeholder(R.drawable.placeholder).fit().into(vhold.image);
+        //        resize(srcWidth, srcHeight).centerCrop().into(vhold.image);
+        //vhold.title.setText(photo.getTitle());
 
         //Load the Avatar image
-        Picasso.with(context).load(avatar.src).resize(avatarWidth, avatarHeight).centerCrop().into(vhold.userImage);
-        vhold.userName.setText(user.username);
-        vhold.url.setText(item.attrib);
-
-        view.setOnLongClickListener(new ItemOnLongClickListener(item));
-        view.setOnClickListener(new ItemOnClickListener(item, context, cursor.getPosition()));
+//        Picasso.with(context).load(avatar.src).resize(avatarWidth, avatarHeight).centerCrop().into(vhold.userImage);
+//        vhold.userName.setText(user.username);
+//        vhold.url.setText(photo.attrib);
+//
+//        view.setOnLongClickListener(new PhotoOnLongClickListener(photo));
+        view.setOnClickListener(new PhotoOnClickListener(photo, context, cursor.getPosition()));
     }
 
-
-    /* A simple interface giving us the column number for each column in a FeedItem query*/
-    private interface FeedQuery {
-        static final int AVATAR_SRC = 0;
-        static final int USERNAME = 1;
-        static final int DESC = 2;
-        static final int ID = 3;
-        static final int NAME = 4;
-        static final int AVATAR_WIDTH = 5;
-        static final int SRC = 6;
-        static final int HREF = 7;
-        static final int ATTRIB = 8;
-        static final int AVATAR_HEIGHT = 9;
+    /* An interface defining the column numbers for each field in a photo */
+    private interface PhotoQuery {
+        static final int ID = 0;
+        static final int URL = 1;
+        static final int FARM = 2;
+        static final int TITLE = 3;
+        static final int OWNER = 4;
+        static final int SERVER = 5;
+        static final int SECRET = 6;
     }
 
+    private static class ViewHolder {
+        SquareImageView image;
+        TextView title;
+        TextView url;
+        ImageView userImage;
+        TextView userName;
+    }
+
+//    /**
+//     * A long press on an photo will launch an ACTION_VIEW intent
+//     */
+//    private class PhotoOnLongClickListener implements View.OnLongClickListener {
+//        final Photo photo;
+//
+//        public PhotoOnLongClickListener(Photo item) {
+//            this.photo = item;
+//        }
+//
+//        @Override
+//        public boolean onLongClick(View v) {
+//            Intent i = new Intent(Intent.ACTION_VIEW);
+//            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            i.setData(Uri.parse(photo.getUrl()));
+//            v.getContext().getApplicationContext().startActivity(i);
+//            return true;
+//        }
+//    }
 
     /**
-     * A long press on an item will launch an ACTION_VIEW intent
+     * Clicking an photo will start an ItemActionMode
      */
-    private class ItemOnLongClickListener implements View.OnLongClickListener {
-        final FeedItem item;
-
-        public ItemOnLongClickListener(FeedItem item) {
-            this.item = item;
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.setData(Uri.parse(item.href));
-            v.getContext().getApplicationContext().startActivity(i);
-            return true;
-        }
-    }
-
-    /**
-     * Clicking an item will start an ItemActionMode
-     */
-    private class ItemOnClickListener implements View.OnClickListener {
-        private final FeedItem item;
+    private class PhotoOnClickListener implements View.OnClickListener {
+        private final Photo item;
         private final int position;
         private final Context context;
 
-        public ItemOnClickListener(FeedItem item, Context context, int position) {
+        public PhotoOnClickListener(Photo item, Context context, int position) {
             this.item = item;
             this.context = context;
             this.position = position;
@@ -137,58 +136,57 @@ class FeedAdapter extends CursorAdapter {
 
         @Override
         public void onClick(View v) {
-            v.setSelected(true);
-            ((FeedReaderActivity) context).startSupportActionMode(new ItemActionMode(item, context, position));
+            NetworkService.startActionGetPhotoComments(context, item.getId());
         }
     }
 
-    /**
-     * Currently gives two options for a selected item, opening an ACTION_VIEW intent
-     * (same as long press) or a share intent.
-     */
-    private class ItemActionMode implements ActionMode.Callback {
-        private final FeedItem selectedItem;
-        private final int position;
-        private final Context context;
-
-        public ItemActionMode(FeedItem item, Context context, int position) {
-            this.selectedItem = item;
-            this.context = context;
-            this.position = position;
-        }
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            ((ListView) ((FeedReaderActivity) context).findViewById(R.id.listview)).setItemChecked(position, true);
-            mode.getMenuInflater().inflate(R.menu.action_mode, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return true;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            if (item.getItemId() == R.id.open_pin && selectedItem != null) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(selectedItem.href));
-                context.startActivity(i);
-            } else if (item.getItemId() == R.id.share && selectedItem != null) {
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("text/plain");
-                i.putExtra(Intent.EXTRA_SUBJECT, selectedItem.desc);
-                i.putExtra(Intent.EXTRA_TEXT, selectedItem.href);
-                context.startActivity(Intent.createChooser(i, "Share Pin"));
-            }
-            return false;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            ((ListView) ((FeedReaderActivity) context).findViewById(R.id.listview)).setItemChecked(position, false);
-        }
-    }
+//    /**
+//     * Currently gives two options for a selected photo, opening an ACTION_VIEW intent
+//     * (same as long press) or a share intent.
+//     */
+//    private class ItemActionMode implements ActionMode.Callback {
+//        private final Photo selectedItem;
+//        private final int position;
+//        private final Context context;
+//
+//        public ItemActionMode(Photo item, Context context, int position) {
+//            this.selectedItem = item;
+//            this.context = context;
+//            this.position = position;
+//        }
+//
+//        @Override
+//        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+//            ((GridView) ((FeedReaderActivity) context).findViewById(R.id.gridview)).setItemChecked(position, true);
+//            mode.getMenuInflater().inflate(R.menu.action_mode, menu);
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+//            if (item.getItemId() == R.id.open_pin && selectedItem != null) {
+//                Intent i = new Intent(Intent.ACTION_VIEW);
+//                i.setData(Uri.parse(selectedItem.getUrl()));
+//                context.startActivity(i);
+//            } else if (item.getItemId() == R.id.share && selectedItem != null) {
+//                Intent i = new Intent(Intent.ACTION_SEND);
+//                i.setType("text/plain");
+//                i.putExtra(Intent.EXTRA_SUBJECT, selectedItem.getTitle());
+//                i.putExtra(Intent.EXTRA_TEXT, selectedItem.getUrl());
+//                context.startActivity(Intent.createChooser(i, "Share Pin"));
+//            }
+//            return false;
+//        }
+//
+//        @Override
+//        public void onDestroyActionMode(ActionMode mode) {
+//            ((ListView) ((FeedReaderActivity) context).findViewById(R.id.gridview)).setItemChecked(position, false);
+//        }
+//    }
 
 }

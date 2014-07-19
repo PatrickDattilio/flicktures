@@ -19,7 +19,10 @@ android {
 }
 
 dependencies {
+    compile group: 'com.squareup.picasso', name: 'picasso', version: '2.3.2'
+    compile group: 'com.googlecode.flickrj-android', name: 'flickrj-android', version: '2.1.0'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    // You must install or update the Support Repository through the SDK manager to use this dependency.
     compile 'com.android.support:support-v4:19.1.0'
     compile 'com.android.support:appcompat-v7:19.1.0'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
 }

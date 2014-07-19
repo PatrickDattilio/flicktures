@@ -9,15 +9,11 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.GridView;
 
 import com.dattilio.reader.network.NetworkService;
 import com.dattilio.reader.network.ResponseReceiver;
 import com.dattilio.reader.persist.ReaderContentProvider;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
 
 public class FeedReaderActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -33,14 +29,15 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
         receiver = new ResponseReceiver(this);
         getSupportLoaderManager().initLoader(FEED_LOADER, null, FeedReaderActivity.this);
         adapter = new FeedAdapter(FeedReaderActivity.this, null);
-        ((ListView) findViewById(R.id.listview)).setAdapter(adapter);
+        ((GridView) findViewById(R.id.gridview)).setNumColumns(2);
+        ((GridView) findViewById(R.id.gridview)).setAdapter(adapter);
 
         findViewById(R.id.refresh_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 refresh();
                 findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
-                findViewById(R.id.listview).setVisibility(View.VISIBLE);
+                findViewById(R.id.gridview).setVisibility(View.VISIBLE);
                 findViewById(R.id.error_layout).setVisibility(View.INVISIBLE);
             }
         });

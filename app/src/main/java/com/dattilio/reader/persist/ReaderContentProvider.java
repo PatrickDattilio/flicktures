@@ -16,18 +16,23 @@ import java.util.HashMap;
 
 public class ReaderContentProvider extends ContentProvider {
     static final String PROVIDER_NAME = "com.dattilio.reader.provider";
-    static final String URL = "content://" + PROVIDER_NAME + "/feeditem";
+
+    static final String URL = "content://" + PROVIDER_NAME + "/photo";
     public static final Uri CONTENT_URI = Uri.parse(URL);
 
-    static final int FEEDITEM = 1;
-    static final int FEEDITEM_ID = 2;
+    static final int PHOTO = 1;
+    static final int PHOTO_ID = 2;
+    static final int COMMENT = 3;
+    static final int COMMENT_ID = 4;
 
     static final UriMatcher uriMatcher;
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(PROVIDER_NAME, "feeditem", FEEDITEM);
-        uriMatcher.addURI(PROVIDER_NAME, "feeditem/#", FEEDITEM_ID);
+        uriMatcher.addURI(PROVIDER_NAME, "photo", PHOTO);
+        uriMatcher.addURI(PROVIDER_NAME, "photo/#", PHOTO_ID);
+        uriMatcher.addURI(PROVIDER_NAME, "comment", COMMENT);
+        uriMatcher.addURI(PROVIDER_NAME, "comment/#", COMMENT_ID);
     }
 
     public static HashMap<String, String> FeedItemMap;
@@ -35,30 +40,38 @@ public class ReaderContentProvider extends ContentProvider {
     DBHelper dbHelper;
 
     public ReaderContentProvider() {
-        FeedItemMap = new HashMap<String, String>();
-        FeedItemMap.put(DBHelper.ID,DBHelper.ID);
-        FeedItemMap.put(DBHelper.ATTRIB,DBHelper.ATTRIB);
-        FeedItemMap.put(DBHelper.DESC,DBHelper.DESC);
-        FeedItemMap.put(DBHelper.HREF,DBHelper.HREF);
-        FeedItemMap.put(DBHelper.SRC,DBHelper.SRC);
-        FeedItemMap.put(DBHelper.NAME,DBHelper.NAME);
-        FeedItemMap.put(DBHelper.HREF,DBHelper.HREF);
-        FeedItemMap.put(DBHelper.AVATAR_SRC,DBHelper.AVATAR_SRC);
-        FeedItemMap.put(DBHelper.AVATAR_WIDTH,DBHelper.AVATAR_WIDTH);
-        FeedItemMap.put(DBHelper.AVATAR_HEIGHT,DBHelper.AVATAR_HEIGHT);
-        FeedItemMap.put(DBHelper.USERNAME,DBHelper.USERNAME);
+//        FeedItemMap = new HashMap<String, String>();
+//        FeedItemMap.put(DBHelper.ID,DBHelper.ID);
+//        FeedItemMap.put(DBHelper.ATTRIB,DBHelper.ATTRIB);
+//        FeedItemMap.put(DBHelper.DESC,DBHelper.DESC);
+//        FeedItemMap.put(DBHelper.HREF,DBHelper.HREF);
+//        FeedItemMap.put(DBHelper.SRC,DBHelper.SRC);
+//        FeedItemMap.put(DBHelper.NAME,DBHelper.NAME);
+//        FeedItemMap.put(DBHelper.HREF,DBHelper.HREF);
+//        FeedItemMap.put(DBHelper.AVATAR_SRC,DBHelper.AVATAR_SRC);
+//        FeedItemMap.put(DBHelper.AVATAR_WIDTH,DBHelper.AVATAR_WIDTH);
+//        FeedItemMap.put(DBHelper.AVATAR_HEIGHT,DBHelper.AVATAR_HEIGHT);
+//        FeedItemMap.put(DBHelper.USERNAME,DBHelper.USERNAME);
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int count;
         switch (uriMatcher.match(uri)) {
-            case FEEDITEM:
-                count = dbHelper.getWritableDatabase().delete(DBHelper.TABLE_NAME, selection, selectionArgs);
+            case PHOTO:
+                count = dbHelper.getWritableDatabase().delete(DBHelper.PHOTO_TABLE, selection, selectionArgs);
                 break;
-            case FEEDITEM_ID:
+            case PHOTO_ID:
                 String id = uri.getLastPathSegment();
-                count = dbHelper.getWritableDatabase().delete(DBHelper.TABLE_NAME, DBHelper.ID +" = " + id + (!TextUtils.isEmpty(selection) ? " AND (" +
+                count = dbHelper.getWritableDatabase().delete(DBHelper.PHOTO_TABLE, DBHelper.ID + " = " + id + (!TextUtils.isEmpty(selection) ? " AND (" +
+                        selection + ')' : ""), selectionArgs);
+                break;
+            case COMMENT:
+                count = dbHelper.getWritableDatabase().delete(DBHelper.COMMENT_TABLE, selection, selectionArgs);
+                break;
+            case COMMENT_ID:
+                id = uri.getLastPathSegment();
+                count = dbHelper.getWritableDatabase().delete(DBHelper.COMMENT_TABLE, DBHelper.ID + " = " + id + (!TextUtils.isEmpty(selection) ? " AND (" +
                         selection + ')' : ""), selectionArgs);
                 break;
             default:
@@ -71,10 +84,14 @@ public class ReaderContentProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (uriMatcher.match(uri)) {
-            case FEEDITEM:
-                return "vnd.android.cursor.dir/vnd.example.feeditem";
-            case FEEDITEM_ID:
-                return "vnd.android.cursor.item/vnd.example.feeditem";
+            case PHOTO:
+                return "vnd.android.cursor.dir/vnd.example.photo";
+            case PHOTO_ID:
+                return "vnd.android.cursor.item/vnd.example.photo";
+            case COMMENT:
+                return "vnd.android.cursor.dir/vnd.example.comment";
+            case COMMENT_ID:
+                return "vnd.android.cursor.item/vnd.example.comment";
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -82,7 +99,20 @@ public class ReaderContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        long row = dbHelper.getWritableDatabase().insertWithOnConflict(DBHelper.TABLE_NAME, "", values, SQLiteDatabase.CONFLICT_REPLACE);
+        String table = null;
+        switch (uriMatcher.match(uri)) {
+            case PHOTO:
+            case PHOTO_ID:
+                table = DBHelper.PHOTO_TABLE;
+                break;
+            case COMMENT:
+            case COMMENT_ID:
+                table = DBHelper.COMMENT_TABLE;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported URI: " + uri);
+        }
+        long row = dbHelper.getWritableDatabase().insertWithOnConflict(table, "", values, SQLiteDatabase.CONFLICT_REPLACE);
         if (row > 0) {
             Uri newUri = ContentUris.withAppendedId(CONTENT_URI, row);
             getContext().getContentResolver().notifyChange(newUri, null);
@@ -103,14 +133,21 @@ public class ReaderContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-        queryBuilder.setTables(DBHelper.TABLE_NAME);
 
         switch (uriMatcher.match(uri)) {
-            case FEEDITEM:
-                queryBuilder.setProjectionMap(FeedItemMap);
+            case PHOTO:
+                queryBuilder.setTables(DBHelper.PHOTO_TABLE);
                 break;
-            case FEEDITEM_ID:
+            case PHOTO_ID:
+                queryBuilder.setTables(DBHelper.PHOTO_TABLE);
                 queryBuilder.appendWhere( DBHelper.ID +" =" + uri.getLastPathSegment());
+                break;
+            case COMMENT:
+                queryBuilder.setTables(DBHelper.COMMENT_TABLE);
+                break;
+            case COMMENT_ID:
+                queryBuilder.setTables(DBHelper.COMMENT_TABLE);
+                queryBuilder.appendWhere(DBHelper.ID + " =" + uri.getLastPathSegment());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Query URI " + uri);
@@ -132,12 +169,20 @@ public class ReaderContentProvider extends ContentProvider {
             String[] selectionArgs) {
         int count;
         switch (uriMatcher.match(uri)) {
-            case FEEDITEM:
-                count = dbHelper.getWritableDatabase().update(DBHelper.TABLE_NAME, values, selection, selectionArgs);
+            case PHOTO:
+                count = dbHelper.getWritableDatabase().update(DBHelper.PHOTO_TABLE, values, selection, selectionArgs);
                 break;
-            case FEEDITEM_ID:
+            case PHOTO_ID:
                 String id = uri.getLastPathSegment();
-                count = dbHelper.getWritableDatabase().update(DBHelper.TABLE_NAME, values, DBHelper.ID +" = " + id + (!TextUtils.isEmpty(selection) ? " AND (" +
+                count = dbHelper.getWritableDatabase().update(DBHelper.PHOTO_TABLE, values, DBHelper.ID + " = " + id + (!TextUtils.isEmpty(selection) ? " AND (" +
+                        selection + ')' : ""), selectionArgs);
+                break;
+            case COMMENT:
+                count = dbHelper.getWritableDatabase().update(DBHelper.COMMENT_TABLE, values, selection, selectionArgs);
+                break;
+            case COMMENT_ID:
+                id = uri.getLastPathSegment();
+                count = dbHelper.getWritableDatabase().update(DBHelper.COMMENT_TABLE, values, DBHelper.ID + " = " + id + (!TextUtils.isEmpty(selection) ? " AND (" +
                         selection + ')' : ""), selectionArgs);
                 break;
             default:

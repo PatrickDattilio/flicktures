@@ -12,35 +12,38 @@ import android.util.Log;
 // class that creates and manages the provider's database
 public class DBHelper extends SQLiteOpenHelper {
 
-    static final String DATABASE_NAME = "ReaderDatabase";
-    static final int DATABASE_VERSION = 1;
-
-    public static final String TABLE_NAME = "feedItemTable";
+    public static final String PHOTO_TABLE = "photo";
     public static final String ID = "_id";
-    public static final String ATTRIB = "attrib";
-    public static final String DESC = "desc";
-    public static final String HREF = "href";
-    public static final String SRC = "src";
-    public static final String NAME = "name";
-    public static final String AVATAR_SRC = "avatar_src";
-    public static final String AVATAR_WIDTH = "avatar_width";
-    public static final String AVATAR_HEIGHT = "avatar_height";
-    public static final String USERNAME = "username";
-
-
-    static final String CREATE_TABLE =
-            " CREATE TABLE " + TABLE_NAME +
-                    " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    " " + ATTRIB + " TEXT NOT NULL, " +
-                    " " + DESC + " TEXT NOT NULL, " +
-                    " " + HREF + " TEXT NOT NULL, " +
-                    " " + SRC + " TEXT NOT NULL, " +
-                    " " + NAME + " TEXT NOT NULL, " +
-                    " " + AVATAR_SRC + " TEXT NOT NULL, " +
-                    " " + AVATAR_WIDTH + " INTEGER NOT NULL, " +
-                    " " + AVATAR_HEIGHT + " INTEGER NOT NULL, " +
-                    " " + USERNAME + " TEXT NOT NULL);";
-
+    public static final String URL = "url";
+    public static final String FARM = "farm";
+    public static final String TITLE = "title";
+    public static final String OWNER = "owner";
+    public static final String SERVER = "server";
+    public static final String SECRET = "secret";
+    private static final String CREATE_PHOTO_TABLE =
+            " CREATE TABLE " + PHOTO_TABLE +
+                    " (" + ID + " TEXT PRIMARY KEY, " +
+                    " " + URL + " TEXT NOT NULL, " +
+                    " " + FARM + " TEXT NOT NULL, " +
+                    " " + TITLE + " TEXT NOT NULL, " +
+                    " " + OWNER + " TEXT NOT NULL, " +
+                    " " + SERVER + " TEXT NOT NULL, " +
+                    " " + SECRET + " TEXT NOT NULL);";
+    public static final String COMMENT_TABLE = "comment";
+    // ID
+    public static final String PHOTO_ID = "photo_id";
+    public static final String AUTHOR = "author";
+    public static final String AUTHOR_NAME = "authorname";
+    public static final String CONTENT = "content";
+    private static final String CREATE_COMMENT_TABLE =
+            " CREATE TABLE " + COMMENT_TABLE +
+                    " (" + ID + " TEXT PRIMARY KEY, " +
+                    " " + PHOTO_ID + " TEXT NOT NULL, " +
+                    " " + AUTHOR + " TEXT NOT NULL, " +
+                    " " + AUTHOR_NAME + " TEXT NOT NULL, " +
+                    " " + CONTENT + " TEXT NOT NULL);";
+    static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "ReaderDatabase";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,7 +51,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE);
+        db.execSQL(CREATE_PHOTO_TABLE);
+        db.execSQL(CREATE_COMMENT_TABLE);
     }
 
     @Override
@@ -57,7 +61,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ". Old data will be destroyed"
         );
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CREATE_PHOTO_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + CREATE_COMMENT_TABLE);
         onCreate(db);
     }
 

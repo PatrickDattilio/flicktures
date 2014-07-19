@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.dattilio.reader.FeedReaderActivity;
@@ -31,7 +30,7 @@ public class ResponseReceiver extends BroadcastReceiver {
         errorText.setText(error);
 
         feedReaderActivity.findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
-        feedReaderActivity.findViewById(R.id.listview).setVisibility(View.INVISIBLE);
+        feedReaderActivity.findViewById(R.id.gridview).setVisibility(View.INVISIBLE);
         feedReaderActivity.findViewById(R.id.error_layout).setVisibility(View.VISIBLE);
     }
 }

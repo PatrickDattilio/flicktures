@@ -3,27 +3,34 @@ package com.dattilio.reader.network;
 import android.app.IntentService;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 
 import com.dattilio.reader.R;
-import com.dattilio.reader.types.FeedItem;
 import com.dattilio.reader.persist.DBHelper;
 import com.dattilio.reader.persist.ReaderContentProvider;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.squareup.okhttp.OkHttpClient;
+import com.googlecode.flickrjandroid.Flickr;
+import com.googlecode.flickrjandroid.FlickrException;
+import com.googlecode.flickrjandroid.photos.Photo;
+import com.googlecode.flickrjandroid.photos.PhotoList;
+import com.googlecode.flickrjandroid.photos.comments.Comment;
+
+import org.json.JSONException;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.List;
 
 public class NetworkService extends IntentService {
 
     public static final String ERROR_TEXT = "error";
     private static final String ACTION_GET = "com.dattilio.reader.action.GET";
+    private static final String ACTION_GET_PHOTO_COMMENTS = "com.dattilio.reader.action.GET_PHOTO_COMMENTS";
+
     private static final String EXTRA_URL = "com.dattilio.reader.extra.URL";
+    private static final String EXTRA_ID = "com.dattilio.reader.extra.ID";
+
+    private Flickr mFlickr;
 
     public NetworkService() {
         super("NetworkService");
@@ -36,6 +43,13 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startActionGetPhotoComments(Context context, String id) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_GET_PHOTO_COMMENTS);
+        intent.putExtra(EXTRA_ID, id);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -43,6 +57,9 @@ public class NetworkService extends IntentService {
             if (ACTION_GET.equals(action)) {
                 final String url = intent.getStringExtra(EXTRA_URL);
                 handleActionGet(url);
+            } else if (ACTION_GET_PHOTO_COMMENTS.equals(action)) {
+                final String id = intent.getStringExtra(EXTRA_ID);
+                handleActionGetPhotoComments(id);
             }
         }
     }
@@ -55,32 +72,54 @@ public class NetworkService extends IntentService {
      */
     private void handleActionGet(String urlString) {
         try {
+            String date = null;
+            PhotoList photoList = getFlickr().getInterestingnessInterface().getList(date, null, 25, 0);
 
-            OkHttpClient client = new OkHttpClient();
-            URL url = new URL(urlString);
-            Gson gson = new Gson();
-            //Using OkHttp and GSON we are able to do the downloading and parsing in essentially one line
-            JsonReader reader = new JsonReader(new InputStreamReader(client.open(url).getInputStream()));
-            FeedItem[] items = gson.fromJson(reader, FeedItem[].class);
-            reader.close();
+//            OkHttpClient client = new OkHttpClient();
+//            URL url = new URL(urlString);
+//            Gson gson = new Gson();
+//            //Using OkHttp and GSON we are able to do the downloading and parsing in essentially one line
+//            JsonReader reader = new JsonReader(new InputStreamReader(client.open(url).getInputStream()));
+//            FeedItem[] items = gson.fromJson(reader, FeedItem[].class);
+//            reader.close();
 
             //Now we update the ContentProvider with the results
             ContentResolver contentResolver = getContentResolver();
-            for (FeedItem item:items) {
+            for (Photo photo : photoList) {
                 ContentValues values = new ContentValues();
-                values.put(DBHelper.ATTRIB,item.attrib);
-                values.put(DBHelper.DESC,item.desc);
-                values.put(DBHelper.HREF,item.href);
-                values.put(DBHelper.SRC,item.src);
-                values.put(DBHelper.NAME,item.user.name);
-                values.put(DBHelper.AVATAR_SRC,item.user.avatar.src);
-                values.put(DBHelper.AVATAR_WIDTH,item.user.avatar.width);
-                values.put(DBHelper.AVATAR_HEIGHT,item.user.avatar.height);
-                values.put(DBHelper.USERNAME,item.user.username);
-                contentResolver.insert(ReaderContentProvider.CONTENT_URI,values);
+                values.put(DBHelper.ID, photo.getId());
+                values.put(DBHelper.URL, photo.getUrl());
+                values.put(DBHelper.FARM, photo.getFarm());
+                values.put(DBHelper.TITLE, photo.getTitle());
+                values.put(DBHelper.OWNER, photo.getOwner().getId());
+                values.put(DBHelper.SERVER, photo.getServer());
+                values.put(DBHelper.SECRET, photo.getSecret());
+                contentResolver.insert(ReaderContentProvider.CONTENT_URI, values);
             }
         } catch (Exception e) {
             handleException(e);
+        }
+    }
+
+    private void handleActionGetPhotoComments(String id) {
+        try {
+            List<Comment> list = getFlickr().getCommentsInterface().getList(id, null, null);
+            ContentResolver contentResolver = getContentResolver();
+            for (Comment comment : list) {
+                ContentValues values = new ContentValues();
+                values.put(DBHelper.ID, comment.getId());
+                values.put(DBHelper.PHOTO_ID, id);
+                values.put(DBHelper.AUTHOR, comment.getAuthor());
+                values.put(DBHelper.AUTHOR_NAME, comment.getAuthorName());
+                values.put(DBHelper.CONTENT, comment.getText());
+                contentResolver.insert(ReaderContentProvider.CONTENT_URI, values);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (FlickrException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -102,5 +141,13 @@ public class NetworkService extends IntentService {
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
         broadcastIntent.putExtra(ERROR_TEXT, error);
         sendBroadcast(broadcastIntent);
+    }
+
+    private Flickr getFlickr() {
+        if (mFlickr == null) {
+            mFlickr = new Flickr(getString(R.string.flickr_api_key));
+
+        }
+        return mFlickr;
     }
 }
