@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dattilio.reader.persist.DBHelper;
 import com.dattilio.reader.persist.ReaderContentProvider;
 
 public class PhotoCommentActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -24,9 +25,10 @@ public class PhotoCommentActivity extends ActionBarActivity implements LoaderMan
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportLoaderManager().initLoader(COMMENT_LOADER, null, this);
+        getSupportLoaderManager().initLoader(COMMENT_LOADER, getIntent().getExtras(), this);
         mAdapter = new CommentAdapter(this, null);
         setContentView(R.layout.activity_photo_comment);
+        setTitle(getIntent().getExtras().getString(DBHelper.TITLE));
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, new PlaceholderFragment())
@@ -58,7 +60,7 @@ public class PhotoCommentActivity extends ActionBarActivity implements LoaderMan
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case COMMENT_LOADER:
-                return new CursorLoader(this, ReaderContentProvider.COMMENT_URI, null, null, null, null);
+                return new CursorLoader(this, ReaderContentProvider.COMMENT_URI, null, DBHelper.PHOTO_ID + " = ?", new String[]{args.getString(DBHelper.ID)}, null);
             default:
                 return null;
         }

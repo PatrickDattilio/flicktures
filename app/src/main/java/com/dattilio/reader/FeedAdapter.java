@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dattilio.reader.network.NetworkService;
+import com.dattilio.reader.persist.DBHelper;
 import com.googlecode.flickrjandroid.people.User;
 import com.googlecode.flickrjandroid.photos.Photo;
 import com.squareup.picasso.Picasso;
@@ -129,7 +131,12 @@ class FeedAdapter extends CursorAdapter {
         @Override
         public void onClick(View v) {
             NetworkService.startActionGetPhotoComments(context, item.getId());
-            context.startActivity(new Intent(context, PhotoCommentActivity.class));
+            Intent intent = new Intent(context, PhotoCommentActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString(DBHelper.ID, item.getId());
+            bundle.putString(DBHelper.TITLE, item.getTitle());
+            intent.putExtras(bundle);
+            context.startActivity(intent);
         }
     }
 

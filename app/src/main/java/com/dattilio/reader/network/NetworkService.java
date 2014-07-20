@@ -75,14 +75,6 @@ public class NetworkService extends IntentService {
             String date = null;
             PhotoList photoList = getFlickr().getInterestingnessInterface().getList(date, null, 25, 0);
 
-//            OkHttpClient client = new OkHttpClient();
-//            URL url = new URL(urlString);
-//            Gson gson = new Gson();
-//            //Using OkHttp and GSON we are able to do the downloading and parsing in essentially one line
-//            JsonReader reader = new JsonReader(new InputStreamReader(client.open(url).getInputStream()));
-//            FeedItem[] items = gson.fromJson(reader, FeedItem[].class);
-//            reader.close();
-
             //Now we update the ContentProvider with the results
             ContentResolver contentResolver = getContentResolver();
             for (Photo photo : photoList) {
