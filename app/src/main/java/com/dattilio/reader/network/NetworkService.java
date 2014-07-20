@@ -19,7 +19,9 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class NetworkService extends IntentService {
 
@@ -55,8 +57,7 @@ public class NetworkService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_GET.equals(action)) {
-                final String url = intent.getStringExtra(EXTRA_URL);
-                handleActionGet(url);
+                handleActionGet();
             } else if (ACTION_GET_PHOTO_COMMENTS.equals(action)) {
                 final String id = intent.getStringExtra(EXTRA_ID);
                 handleActionGetPhotoComments(id);
@@ -68,13 +69,13 @@ public class NetworkService extends IntentService {
      * When our service recieves an ACTION_GET, we attempt to parse an array of FeedItems from a JSON
      * string returned by the provided url.
      *
-     * @param urlString - Url from which we want to retrieve the JSON string.
      */
-    private void handleActionGet(String urlString) {
+    private void handleActionGet() {
         try {
             String date = null;
-            PhotoList photoList = getFlickr().getInterestingnessInterface().getList(date, null, 25, 0);
-
+            Set<String> extras = new HashSet<String>();
+            extras.add("owner_name");
+            PhotoList photoList = getFlickr().getInterestingnessInterface().getList(date, extras, 25, 0);
             //Now we update the ContentProvider with the results
             ContentResolver contentResolver = getContentResolver();
             for (Photo photo : photoList) {
@@ -84,6 +85,7 @@ public class NetworkService extends IntentService {
                 values.put(DBHelper.FARM, photo.getFarm());
                 values.put(DBHelper.TITLE, photo.getTitle());
                 values.put(DBHelper.OWNER, photo.getOwner().getId());
+                values.put(DBHelper.OWNER_NAME, photo.getOwner().getUsername());
                 values.put(DBHelper.SERVER, photo.getServer());
                 values.put(DBHelper.SECRET, photo.getSecret());
                 contentResolver.insert(ReaderContentProvider.PHOTO_URI, values);

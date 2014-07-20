@@ -18,6 +18,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String FARM = "farm";
     public static final String TITLE = "title";
     public static final String OWNER = "owner";
+    public static final String OWNER_NAME = "owner_name";
     public static final String SERVER = "server";
     public static final String SECRET = "secret";
     private static final String CREATE_PHOTO_TABLE =
@@ -27,6 +28,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     " " + FARM + " TEXT NOT NULL, " +
                     " " + TITLE + " TEXT NOT NULL, " +
                     " " + OWNER + " TEXT NOT NULL, " +
+                    " " + OWNER_NAME + " TEXT NOT NULL, " +
                     " " + SERVER + " TEXT NOT NULL, " +
                     " " + SECRET + " TEXT NOT NULL);";
 

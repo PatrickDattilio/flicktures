@@ -21,17 +21,17 @@
 
         <service
             android:name=".network.NetworkService"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <provider
             android:name=".persist.ReaderContentProvider"
             android:authorities="com.dattilio.reader.provider"
             android:enabled="true"
-            android:exported="true"></provider>
+            android:exported="true" />
 
         <activity
             android:name=".PhotoCommentActivity"
-            android:label="@string/title_activity_photo_comment"></activity>
+            android:label="@string/title_activity_photo_comment" />
     </application>
 
 </manifest>

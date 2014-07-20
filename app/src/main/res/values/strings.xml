@@ -4,16 +4,10 @@
     <string name="app_name">Flicktures</string>
     <string name="json_feed_url">http://sheltered-bastion-2512.herokuapp.com/feed.json</string>
     <string name="flickr_api_key">5a2e58feabe3131aaa095391bad0f8f8</string>
-    <string name="avatar_cd">User Avatar Image</string>
-    <string name="item_image_cd">Item Image</string>
-    <string name="open_url">Open URL</string>
-    <string name="share">Share</string>
     <string name="default_network_error">Unknown error occurred.</string>
     <string name="malformed_url_error">The feed URL is malformed.</string>
     <string name="io_error">Unable to connect to the feed, please check your connection and refresh.</string>
     <string name="refresh">Refresh</string>
     <string name="title_activity_photo_comment">PhotoCommentActivity</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
 
 </resources>

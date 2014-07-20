@@ -24,12 +24,12 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_feed_reader);
 
         receiver = new ResponseReceiver(this);
         getSupportLoaderManager().initLoader(FEED_LOADER, null, FeedReaderActivity.this);
         adapter = new FeedAdapter(FeedReaderActivity.this, null);
-        ((GridView) findViewById(R.id.gridview)).setNumColumns(2);
         ((GridView) findViewById(R.id.gridview)).setAdapter(adapter);
 
         findViewById(R.id.refresh_button).setOnClickListener(new View.OnClickListener() {

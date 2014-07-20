@@ -101,7 +101,7 @@ public class ReaderContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        String table = null;
+        String table;
         switch (uriMatcher.match(uri)) {
             case PHOTO:
             case PHOTO_ID:
@@ -129,12 +129,12 @@ public class ReaderContentProvider extends ContentProvider {
         Context context = getContext();
         dbHelper = new DBHelper(context);
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        return database !=null;
+        return database != null;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) {
+                        String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
         switch (uriMatcher.match(uri)) {
@@ -143,7 +143,7 @@ public class ReaderContentProvider extends ContentProvider {
                 break;
             case PHOTO_ID:
                 queryBuilder.setTables(DBHelper.PHOTO_TABLE);
-                queryBuilder.appendWhere( DBHelper.ID +" =" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(DBHelper.ID + " =" + uri.getLastPathSegment());
                 break;
             case COMMENT:
                 queryBuilder.setTables(DBHelper.COMMENT_TABLE);
@@ -156,7 +156,7 @@ public class ReaderContentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown Query URI " + uri);
         }
 
-        if (sortOrder == null || sortOrder.equals("")){
+        if (sortOrder == null || sortOrder.equals("")) {
             sortOrder = DBHelper.ID;
         }
 
@@ -169,7 +169,7 @@ public class ReaderContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection,
-            String[] selectionArgs) {
+                      String[] selectionArgs) {
         int count;
         switch (uriMatcher.match(uri)) {
             case PHOTO:
