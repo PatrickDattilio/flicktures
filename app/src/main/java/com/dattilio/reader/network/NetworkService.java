@@ -94,7 +94,7 @@ public class NetworkService extends IntentService {
                 values.put(DBHelper.OWNER, photo.getOwner().getId());
                 values.put(DBHelper.SERVER, photo.getServer());
                 values.put(DBHelper.SECRET, photo.getSecret());
-                contentResolver.insert(ReaderContentProvider.CONTENT_URI, values);
+                contentResolver.insert(ReaderContentProvider.PHOTO_URI, values);
             }
         } catch (Exception e) {
             handleException(e);
@@ -112,7 +112,7 @@ public class NetworkService extends IntentService {
                 values.put(DBHelper.AUTHOR, comment.getAuthor());
                 values.put(DBHelper.AUTHOR_NAME, comment.getAuthorName());
                 values.put(DBHelper.CONTENT, comment.getText());
-                contentResolver.insert(ReaderContentProvider.CONTENT_URI, values);
+                contentResolver.insert(ReaderContentProvider.COMMENT_URI, values);
             }
         } catch (IOException e) {
             e.printStackTrace();

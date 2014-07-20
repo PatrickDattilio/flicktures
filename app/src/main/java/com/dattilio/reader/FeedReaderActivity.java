@@ -67,7 +67,7 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case FEED_LOADER:
-                return new CursorLoader(this, ReaderContentProvider.CONTENT_URI, null, null, null, null);
+                return new CursorLoader(this, ReaderContentProvider.PHOTO_URI, null, null, null, null);
             default:
                 return null;
         }

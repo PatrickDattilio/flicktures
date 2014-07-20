@@ -1,7 +1,11 @@
 package com.dattilio.reader;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -9,11 +13,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class PhotoCommentActivity extends ActionBarActivity {
+import com.dattilio.reader.persist.ReaderContentProvider;
+
+public class PhotoCommentActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final int COMMENT_LOADER = 0;
+
+    private static CommentAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportLoaderManager().initLoader(COMMENT_LOADER, null, this);
+        mAdapter = new CommentAdapter(this, null);
         setContentView(R.layout.activity_photo_comment);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -42,12 +54,39 @@ public class PhotoCommentActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case COMMENT_LOADER:
+                return new CursorLoader(this, ReaderContentProvider.COMMENT_URI, null, null, null, null);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        data.moveToFirst();
+        if (!data.isAfterLast()) {
+            //findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
+            mAdapter.changeCursor(data);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.changeCursor(null);
+    }
+
     public static class PlaceholderFragment extends ListFragment {
 
         public PlaceholderFragment() {
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setListAdapter(mAdapter);
         }
 
         @Override
@@ -57,4 +96,6 @@ public class PhotoCommentActivity extends ActionBarActivity {
             return rootView;
         }
     }
+
 }
+

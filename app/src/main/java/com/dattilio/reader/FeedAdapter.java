@@ -1,6 +1,7 @@
 package com.dattilio.reader;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
@@ -23,7 +24,7 @@ class FeedAdapter extends CursorAdapter {
     private final int avatarWidth;
     private final int avatarHeight;
 
-    private LayoutInflater inflater;
+    private LayoutInflater mInflater;
 
     public FeedAdapter(Context context, Cursor cursor) {
 
@@ -36,12 +37,12 @@ class FeedAdapter extends CursorAdapter {
         srcHeight = (int) res.getDimension(R.dimen.src_height);
         avatarWidth = (int) res.getDimension(R.dimen.avatar_width);
         avatarHeight = (int) res.getDimension(R.dimen.avatar_height);
-        inflater = LayoutInflater.from(context);
+        mInflater = LayoutInflater.from(context);
     }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = new SquareImageView(context);//inflater.inflate(R.layout.grid_item, parent, false);
+        View view = new SquareImageView(context);//mInflater.inflate(R.layout.grid_item, parent, false);
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.image = (SquareImageView) view;
 //        viewHolder.title = (TextView) view.findViewById(R.id.item_title);
@@ -69,15 +70,6 @@ class FeedAdapter extends CursorAdapter {
 
         //Load the image using Picasso into the photo image, resizing/cropping to fit.
         Picasso.with(context).load(photo.getLargeSquareUrl()).placeholder(R.drawable.placeholder).fit().into(vhold.image);
-        //        resize(srcWidth, srcHeight).centerCrop().into(vhold.image);
-        //vhold.title.setText(photo.getTitle());
-
-        //Load the Avatar image
-//        Picasso.with(context).load(avatar.src).resize(avatarWidth, avatarHeight).centerCrop().into(vhold.userImage);
-//        vhold.userName.setText(user.username);
-//        vhold.url.setText(photo.attrib);
-//
-//        view.setOnLongClickListener(new PhotoOnLongClickListener(photo));
         view.setOnClickListener(new PhotoOnClickListener(photo, context, cursor.getPosition()));
     }
 
@@ -137,6 +129,7 @@ class FeedAdapter extends CursorAdapter {
         @Override
         public void onClick(View v) {
             NetworkService.startActionGetPhotoComments(context, item.getId());
+            context.startActivity(new Intent(context, PhotoCommentActivity.class));
         }
     }
 

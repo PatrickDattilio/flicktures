@@ -17,8 +17,10 @@ import java.util.HashMap;
 public class ReaderContentProvider extends ContentProvider {
     static final String PROVIDER_NAME = "com.dattilio.reader.provider";
 
-    static final String URL = "content://" + PROVIDER_NAME + "/photo";
-    public static final Uri CONTENT_URI = Uri.parse(URL);
+    static final String PHOTO_URL = "content://" + PROVIDER_NAME + "/photo";
+    public static final Uri PHOTO_URI = Uri.parse(PHOTO_URL);
+    static final String COMMENT_URL = "content://" + PROVIDER_NAME + "/comment";
+    public static final Uri COMMENT_URI = Uri.parse(COMMENT_URL);
 
     static final int PHOTO = 1;
     static final int PHOTO_ID = 2;
@@ -104,6 +106,7 @@ public class ReaderContentProvider extends ContentProvider {
             case PHOTO:
             case PHOTO_ID:
                 table = DBHelper.PHOTO_TABLE;
+
                 break;
             case COMMENT:
             case COMMENT_ID:
@@ -114,7 +117,7 @@ public class ReaderContentProvider extends ContentProvider {
         }
         long row = dbHelper.getWritableDatabase().insertWithOnConflict(table, "", values, SQLiteDatabase.CONFLICT_REPLACE);
         if (row > 0) {
-            Uri newUri = ContentUris.withAppendedId(CONTENT_URI, row);
+            Uri newUri = ContentUris.withAppendedId(uri, row);
             getContext().getContentResolver().notifyChange(newUri, null);
             return newUri;
         }

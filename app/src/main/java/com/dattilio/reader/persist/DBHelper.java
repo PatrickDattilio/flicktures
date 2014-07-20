@@ -29,6 +29,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     " " + OWNER + " TEXT NOT NULL, " +
                     " " + SERVER + " TEXT NOT NULL, " +
                     " " + SECRET + " TEXT NOT NULL);";
+
     public static final String COMMENT_TABLE = "comment";
     // ID
     public static final String PHOTO_ID = "photo_id";
@@ -42,6 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     " " + AUTHOR + " TEXT NOT NULL, " +
                     " " + AUTHOR_NAME + " TEXT NOT NULL, " +
                     " " + CONTENT + " TEXT NOT NULL);";
+
     static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ReaderDatabase";
 
