@@ -12,8 +12,6 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import java.util.HashMap;
-
 public class ReaderContentProvider extends ContentProvider {
     static final String PROVIDER_NAME = "com.dattilio.reader.provider";
 
@@ -37,23 +35,9 @@ public class ReaderContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "comment/#", COMMENT_ID);
     }
 
-    public static HashMap<String, String> FeedItemMap;
-
     DBHelper dbHelper;
 
     public ReaderContentProvider() {
-//        FeedItemMap = new HashMap<String, String>();
-//        FeedItemMap.put(DBHelper.ID,DBHelper.ID);
-//        FeedItemMap.put(DBHelper.ATTRIB,DBHelper.ATTRIB);
-//        FeedItemMap.put(DBHelper.DESC,DBHelper.DESC);
-//        FeedItemMap.put(DBHelper.HREF,DBHelper.HREF);
-//        FeedItemMap.put(DBHelper.SRC,DBHelper.SRC);
-//        FeedItemMap.put(DBHelper.NAME,DBHelper.NAME);
-//        FeedItemMap.put(DBHelper.HREF,DBHelper.HREF);
-//        FeedItemMap.put(DBHelper.AVATAR_SRC,DBHelper.AVATAR_SRC);
-//        FeedItemMap.put(DBHelper.AVATAR_WIDTH,DBHelper.AVATAR_WIDTH);
-//        FeedItemMap.put(DBHelper.AVATAR_HEIGHT,DBHelper.AVATAR_HEIGHT);
-//        FeedItemMap.put(DBHelper.USERNAME,DBHelper.USERNAME);
     }
 
     @Override
