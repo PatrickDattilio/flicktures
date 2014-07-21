@@ -9,16 +9,18 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.GridView;
 
 import com.dattilio.reader.network.NetworkService;
 import com.dattilio.reader.network.ResponseReceiver;
+import com.dattilio.reader.persist.DBHelper;
 import com.dattilio.reader.persist.ReaderContentProvider;
 
-public class FeedReaderActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class FeedReaderActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor>, AbsListView.OnScrollListener {
 
     private static final int FEED_LOADER = 0;
-    private FeedAdapter adapter;
+    private FeedAdapter mAdapter;
     private ResponseReceiver receiver;
 
     @Override
@@ -29,8 +31,9 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
 
         receiver = new ResponseReceiver(this);
         getSupportLoaderManager().initLoader(FEED_LOADER, null, FeedReaderActivity.this);
-        adapter = new FeedAdapter(FeedReaderActivity.this, null);
-        ((GridView) findViewById(R.id.gridview)).setAdapter(adapter);
+        mAdapter = new FeedAdapter(FeedReaderActivity.this, null);
+        ((GridView) findViewById(R.id.gridview)).setAdapter(mAdapter);
+        ((GridView) findViewById(R.id.gridview)).setOnScrollListener(this);
 
         findViewById(R.id.refresh_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,7 +44,6 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
                 findViewById(R.id.error_layout).setVisibility(View.INVISIBLE);
             }
         });
-
         refresh();
     }
 
@@ -60,14 +62,14 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
     }
 
     private void refresh() {
-        NetworkService.startActionGet(this, getString(R.string.json_feed_url));
+        NetworkService.startActionGetPhotos(this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case FEED_LOADER:
-                return new CursorLoader(this, ReaderContentProvider.PHOTO_URI, null, null, null, null);
+                return new CursorLoader(this, ReaderContentProvider.PHOTO_URI, null, null, null, DBHelper.TIMESTAMP);
             default:
                 return null;
         }
@@ -78,13 +80,27 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
         data.moveToFirst();
         if (!data.isAfterLast()) {
             findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
-            adapter.changeCursor(data);
+            mAdapter.changeCursor(data);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        adapter.changeCursor(null);
+        mAdapter.changeCursor(null);
     }
 
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE) {
+            if (view.getLastVisiblePosition() > (mAdapter.getCount() / 2)) {
+                NetworkService.startActionGetPhotos(view.getContext());
+            }
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+    }
 }

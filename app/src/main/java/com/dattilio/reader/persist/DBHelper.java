@@ -21,6 +21,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String OWNER_NAME = "owner_name";
     public static final String SERVER = "server";
     public static final String SECRET = "secret";
+    public static final String TIMESTAMP = "timestamp";
     private static final String CREATE_PHOTO_TABLE =
             " CREATE TABLE " + PHOTO_TABLE +
                     " (" + ID + " TEXT PRIMARY KEY, " +
@@ -30,7 +31,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     " " + OWNER + " TEXT NOT NULL, " +
                     " " + OWNER_NAME + " TEXT NOT NULL, " +
                     " " + SERVER + " TEXT NOT NULL, " +
-                    " " + SECRET + " TEXT NOT NULL);";
+                    " " + SECRET + " TEXT NOT NULL, " +
+                    " " + TIMESTAMP + " TEXT NOT NULL);";
 
     public static final String COMMENT_TABLE = "comment";
     // ID

@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import com.dattilio.reader.R;
 import com.dattilio.reader.persist.DBHelper;
@@ -29,7 +30,8 @@ public class NetworkService extends IntentService {
     private static final String ACTION_GET = "com.dattilio.reader.action.GET";
     private static final String ACTION_GET_PHOTO_COMMENTS = "com.dattilio.reader.action.GET_PHOTO_COMMENTS";
 
-    private static final String EXTRA_URL = "com.dattilio.reader.extra.URL";
+    private static final String EXTRA_PHOTO_PER_REQUEST = "com.dattilio.reader.extra.PHOTO_PER_REQUEST";
+    private static final String EXTRA_CURRENT_PAGE = "com.dattilio.reader.extra.CURRENT_PAGE";
     private static final String EXTRA_ID = "com.dattilio.reader.extra.ID";
 
     private Flickr mFlickr;
@@ -38,11 +40,18 @@ public class NetworkService extends IntentService {
         super("NetworkService");
     }
 
-    public static void startActionGet(Context context, String url) {
+    public static void startActionGetPhotos(Context context) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_GET);
-        intent.putExtra(EXTRA_URL, url);
+        SharedPreferences preferences = context.getSharedPreferences("flictures", MODE_PRIVATE);
+        int currentPage = preferences.getInt("currentPage", 0);
+        intent.putExtra(EXTRA_PHOTO_PER_REQUEST, context.getResources().getInteger(R.integer.photos_per_request));
+        intent.putExtra(EXTRA_CURRENT_PAGE, currentPage);
         context.startService(intent);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("currentPage", ++currentPage);
+        editor.apply();
+
     }
 
     public static void startActionGetPhotoComments(Context context, String id) {
@@ -57,7 +66,9 @@ public class NetworkService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_GET.equals(action)) {
-                handleActionGet();
+                int photoPerRequest = intent.getIntExtra(EXTRA_PHOTO_PER_REQUEST, 25);
+                int currentPage = intent.getIntExtra(EXTRA_CURRENT_PAGE, 0);
+                handleActionGet(photoPerRequest, currentPage);
             } else if (ACTION_GET_PHOTO_COMMENTS.equals(action)) {
                 final String id = intent.getStringExtra(EXTRA_ID);
                 handleActionGetPhotoComments(id);
@@ -65,17 +76,12 @@ public class NetworkService extends IntentService {
         }
     }
 
-    /**
-     * When our service recieves an ACTION_GET, we attempt to parse an array of FeedItems from a JSON
-     * string returned by the provided url.
-     *
-     */
-    private void handleActionGet() {
+    private void handleActionGet(int photoPerRequest, int currentPage) {
         try {
             String date = null;
             Set<String> extras = new HashSet<String>();
             extras.add("owner_name");
-            PhotoList photoList = getFlickr().getInterestingnessInterface().getList(date, extras, 25, 0);
+            PhotoList photoList = getFlickr().getInterestingnessInterface().getList(date, extras, photoPerRequest, currentPage);
             //Now we update the ContentProvider with the results
             ContentResolver contentResolver = getContentResolver();
             for (Photo photo : photoList) {
@@ -88,6 +94,7 @@ public class NetworkService extends IntentService {
                 values.put(DBHelper.OWNER_NAME, photo.getOwner().getUsername());
                 values.put(DBHelper.SERVER, photo.getServer());
                 values.put(DBHelper.SECRET, photo.getSecret());
+                values.put(DBHelper.TIMESTAMP, System.currentTimeMillis());
                 contentResolver.insert(ReaderContentProvider.PHOTO_URI, values);
             }
         } catch (Exception e) {

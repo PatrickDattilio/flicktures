@@ -36,7 +36,6 @@ public class PlaceholderFragment extends ListFragment implements LoaderManager.L
         getLoaderManager().initLoader(COMMENT_LOADER, null, this);
         mAdapter = new CommentAdapter(getActivity(), null);
         setListAdapter(mAdapter);
-
     }
 
     @Override
@@ -75,6 +74,5 @@ public class PlaceholderFragment extends ListFragment implements LoaderManager.L
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.changeCursor(null);
     }
-
 
 }
