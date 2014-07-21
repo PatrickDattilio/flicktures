@@ -16,8 +16,6 @@ import com.googlecode.flickrjandroid.photos.Photo;
 import com.googlecode.flickrjandroid.photos.PhotoList;
 import com.googlecode.flickrjandroid.photos.comments.Comment;
 
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
@@ -115,12 +113,8 @@ public class NetworkService extends IntentService {
                 values.put(DBHelper.CONTENT, comment.getText());
                 contentResolver.insert(ReaderContentProvider.COMMENT_URI, values);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (FlickrException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            handleException(e);
         }
     }
 
@@ -136,6 +130,8 @@ public class NetworkService extends IntentService {
             error = getString(R.string.malformed_url_error);
         } else if (e instanceof IOException) {
             error = getString(R.string.io_error);
+        } else if (e instanceof FlickrException) {
+            error = ((FlickrException) e).getErrorMessage();
         }
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(ResponseReceiver.ERROR_RESPONSE);

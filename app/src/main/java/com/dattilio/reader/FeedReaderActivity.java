@@ -21,7 +21,7 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
 
     private static final int FEED_LOADER = 0;
     private FeedAdapter mAdapter;
-    private ResponseReceiver receiver;
+    private ResponseReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +29,7 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
 
         setContentView(R.layout.activity_feed_reader);
 
-        receiver = new ResponseReceiver(this);
+        mReceiver = new ResponseReceiver(this);
         getSupportLoaderManager().initLoader(FEED_LOADER, null, FeedReaderActivity.this);
         mAdapter = new FeedAdapter(FeedReaderActivity.this, null);
         ((GridView) findViewById(R.id.gridview)).setAdapter(mAdapter);
@@ -52,13 +52,13 @@ public class FeedReaderActivity extends ActionBarActivity implements LoaderManag
         super.onResume();
         IntentFilter filter = new IntentFilter(ResponseReceiver.ERROR_RESPONSE);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
-        registerReceiver(receiver, filter);
+        registerReceiver(mReceiver, filter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        unregisterReceiver(mReceiver);
     }
 
     private void refresh() {
