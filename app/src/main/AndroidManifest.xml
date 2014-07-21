@@ -32,6 +32,16 @@
         <activity
             android:name=".PhotoCommentActivity"
             android:label="@string/title_activity_photo_comment" />
+
+        <activity android:name="FlickrViewerActivity">
+            <intent-filter><action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="flicture" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

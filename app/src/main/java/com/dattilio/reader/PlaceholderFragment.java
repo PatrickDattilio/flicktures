@@ -44,7 +44,12 @@ public class PlaceholderFragment extends ListFragment implements LoaderManager.L
         View rootView = inflater.inflate(R.layout.fragment_photo_comment, container, false);
         Photo photo = (Photo) getArguments().getSerializable("photo");
 
-        Picasso.with(getActivity()).load(photo.getLargeSquareUrl()).placeholder(R.drawable.placeholder).resizeDimen(R.dimen.header_photo_width, R.dimen.header_photo_height).into((ImageView) rootView.findViewById(R.id.header_photo_comment_photo));
+        if (getResources().getBoolean(R.bool.resize_comment_photo)) {
+            Picasso.with(getActivity()).load(photo.getLargeSquareUrl()).placeholder(R.drawable.placeholder).resizeDimen(R.dimen.header_photo_width, R.dimen.header_photo_height).into((ImageView) rootView.findViewById(R.id.header_photo_comment_photo));
+        } else {
+            Picasso.with(getActivity()).load(photo.getMediumUrl()).fit().centerCrop().into((ImageView) rootView.findViewById(R.id.header_photo_comment_photo));
+        }
+
         ((TextView) rootView.findViewById(R.id.header_photo_comment_title)).setText(photo.getTitle());
         ((TextView) rootView.findViewById(R.id.header_photo_comment_author)).setText(photo.getOwner().getUsername());
 
