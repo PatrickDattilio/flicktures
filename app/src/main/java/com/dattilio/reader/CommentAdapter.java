@@ -15,7 +15,7 @@ import com.googlecode.flickrjandroid.photos.comments.Comment;
  * Created by Pmoney on 7/19/2014.
  */
 public class CommentAdapter extends CursorAdapter {
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
 
     public CommentAdapter(Context context, Cursor c) {
         super(context, c, FLAG_REGISTER_CONTENT_OBSERVER);

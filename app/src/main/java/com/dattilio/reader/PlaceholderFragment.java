@@ -20,7 +20,7 @@ import com.squareup.picasso.Picasso;
 /**
  * Created by Pmoney on 7/20/2014.
  */
-public class PlaceholderFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+class PlaceholderFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int COMMENT_LOADER = 0;
     private CommentAdapter mAdapter;

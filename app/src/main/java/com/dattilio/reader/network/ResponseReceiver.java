@@ -16,7 +16,7 @@ public class ResponseReceiver extends BroadcastReceiver {
     public static final String ERROR_RESPONSE =
             "com.dattilio.intent.action.ERROR";
 
-    private Activity mActivity;
+    private final Activity mActivity;
 
     public ResponseReceiver(Activity activity) {
         mActivity = activity;

@@ -48,7 +48,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     " " + AUTHOR_NAME + " TEXT NOT NULL, " +
                     " " + CONTENT + " TEXT NOT NULL);";
 
-    static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ReaderDatabase";
 
     public DBHelper(Context context) {

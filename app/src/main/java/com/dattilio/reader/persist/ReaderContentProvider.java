@@ -13,19 +13,19 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 public class ReaderContentProvider extends ContentProvider {
-    static final String PROVIDER_NAME = "com.dattilio.reader.provider";
+    private static final String PROVIDER_NAME = "com.dattilio.reader.provider";
 
-    static final String PHOTO_URL = "content://" + PROVIDER_NAME + "/photo";
+    private static final String PHOTO_URL = "content://" + PROVIDER_NAME + "/photo";
     public static final Uri PHOTO_URI = Uri.parse(PHOTO_URL);
-    static final String COMMENT_URL = "content://" + PROVIDER_NAME + "/comment";
+    private static final String COMMENT_URL = "content://" + PROVIDER_NAME + "/comment";
     public static final Uri COMMENT_URI = Uri.parse(COMMENT_URL);
 
-    static final int PHOTO = 1;
-    static final int PHOTO_ID = 2;
-    static final int COMMENT = 3;
-    static final int COMMENT_ID = 4;
+    private static final int PHOTO = 1;
+    private static final int PHOTO_ID = 2;
+    private static final int COMMENT = 3;
+    private static final int COMMENT_ID = 4;
 
-    static final UriMatcher uriMatcher;
+    private static final UriMatcher uriMatcher;
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -35,7 +35,7 @@ public class ReaderContentProvider extends ContentProvider {
         uriMatcher.addURI(PROVIDER_NAME, "comment/#", COMMENT_ID);
     }
 
-    DBHelper dbHelper;
+    private DBHelper dbHelper;
 
     public ReaderContentProvider() {
     }

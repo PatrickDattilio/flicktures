@@ -48,7 +48,7 @@ class FeedAdapter extends CursorAdapter {
 
         //Load the image using Picasso into the photo image, resizing/cropping to fit.
         Picasso.with(context).load(photo.getLargeSquareUrl()).placeholder(R.drawable.placeholder).fit().into(vhold.image);
-        view.setOnClickListener(new PhotoOnClickListener(photo, context, cursor.getPosition()));
+        view.setOnClickListener(new PhotoOnClickListener(photo, context));
     }
 
     /* An interface defining the column numbers for each field in a photo */
@@ -74,7 +74,7 @@ class FeedAdapter extends CursorAdapter {
         private final Photo item;
         private final Context context;
 
-        public PhotoOnClickListener(Photo item, Context context, int position) {
+        public PhotoOnClickListener(Photo item, Context context) {
             this.item = item;
             this.context = context;
         }
