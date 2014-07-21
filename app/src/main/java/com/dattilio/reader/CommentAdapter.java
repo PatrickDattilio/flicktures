@@ -3,6 +3,7 @@ package com.dattilio.reader;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,7 @@ public class CommentAdapter extends CursorAdapter {
         comment.setAuthor(cursor.getString(CommentQuery.AUTHOR));
         comment.setAuthorName(cursor.getString(CommentQuery.AUTHOR_NAME));
         comment.setText(cursor.getString(CommentQuery.TEXT));
-        viewHolder.comment.setText(comment.getText());
+        viewHolder.comment.setText(Html.fromHtml(comment.getText()));
         String authorName = (comment.getAuthorName() != null && !comment.getAuthorName().equals("")) ? comment.getAuthorName() : comment.getAuthor();
         viewHolder.author.setText(authorName);
 
